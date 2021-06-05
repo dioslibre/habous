@@ -1,5 +1,4 @@
 {
   "presets": ["@babel/preset-env", "@babel/preset-react"],
-  "sourceMaps": "inline",
-  "plugins": ["@babel/plugin-transform-runtime", "react-refresh/babel"]
+  "plugins": ["@babel/plugin-transform-runtime"]
 }
