@@ -1,0 +1,27 @@
+@import "~@carbon/themes/scss/themes";
+
+$carbon--theme: $carbon--theme--g10;
+@include carbon--theme();
+
+@import "~carbon-components/scss/components/ui-shell/_ui-shell.scss";
+@import "~carbon-components/scss/components/text-input/_text-input.scss";
+@import "~carbon-components/scss/components/number-input/_number-input.scss";
+@import "~carbon-components/scss/components/text-area/_text-area.scss";
+@import "~carbon-components/scss/components/button/_button.scss";
+@import "~carbon-components/scss/components/dropdown/_dropdown.scss";
+@import "~carbon-components/scss/components/multi-select/_multi-select.scss";
+@import "~carbon-components/scss/components/loading/_loading.scss";
+@import "~carbon-components/scss/components/tag/_tag.scss";
+@import "~carbon-components/scss/components/modal/_modal.scss";
+@import "~carbon-components/scss/components/tile/_tile.scss";
+
+.bx--btn--primary {
+  background-color: var(--cds-interactive-01, #2b6cb0);
+  &:hover {
+    background-color: var(--cds-interactive-01, #2b6cb0);
+  }
+}
+
+.bx--btn {
+  padding-right: 15px;
+}

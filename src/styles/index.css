@@ -1,0 +1,115 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import "react-toastify/dist/ReactToastify.css";
+
+body * {
+  font-family: "IBM Plex Sans", "Amiri", serif;
+}
+
+.fade-enter {
+  opacity: 0;
+  z-index: 1;
+}
+
+.fade-enter.fade-enter-active {
+  opacity: 1;
+  transition: opacity 250ms ease-in;
+}
+
+svg {
+  margin: auto;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+  width: 100%;
+  border: 1px solid #ddd;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 6px;
+}
+
+tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+.bx--label {
+  @apply font-bold;
+  @apply text-sm;
+  @apply mt-4;
+  @apply mb-1;
+}
+
+.bx--tab-content {
+  overflow: hidden;
+  flex-grow: 1;
+}
+
+.bx--radio-button__label {
+  @apply ml-2;
+}
+
+div[role="tabpanel"] {
+  @apply p-0;
+}
+
+.bx-scrollable::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+.bx-scrollable::-webkit-scrollbar-track {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+}
+
+/* Handle */
+.bx-scrollable::-webkit-scrollbar-thumb {
+  -webkit-border-radius: 0px;
+  border-radius: 0px;
+  @apply bg-blue-700;
+}
+
+.bx--tile {
+  @apply py-2;
+  @apply m-0;
+}
+
+.bx--modal-content {
+  padding: 0px !important;
+}
+
+.bx--modal-container {
+  width: 1200px;
+  max-width: 70%;
+}
+
+@media print {
+  @page {
+    margin: 0;
+  }
+}
+
+.measure-container {
+  position: absolute;
+  top: 10px;
+  right: 100px;
+  z-index: 1;
+}
+
+.measure-container > * {
+  background-color: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  font-size: 11px;
+  line-height: 18px;
+  display: block;
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 3px;
+}

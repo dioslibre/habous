@@ -1,0 +1,36 @@
+POST http://localhost:5984/_session HTTP/1.1
+Content-Type: application/json
+
+{
+    "name": "habous",
+    "password": "habous"
+}
+
+###
+PUT /_users HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Host: localhost:5984
+
+###
+PUT /_users/org.couchdb.user:feb HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+Host: localhost:5984
+
+{
+    "name": "feb",
+    "password": "apple",
+    "roles": [],
+    "type": "user"
+}
+
+###
+GET /_users/org.couchdb.user:feb HTTP/1.1
+Accept: application/json
+Host: localhost:5984
+
+###
+GET /_users/_all_docs?include_docs=true HTTP/1.1
+Accept: application/json
+Host: localhost:5984
