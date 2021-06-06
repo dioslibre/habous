@@ -9,13 +9,14 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: ["babel-loader"],
+        use: {
+          loader: "babel-loader",
+          options: {
+            presets: ["@babel/preset-env", "@babel/preset-react"],
+            plugins: ["@babel/plugin-transform-runtime", "react-refresh/babel"],
+          },
+        },
       },
-      // {
-      //   test: /\.(ts|tsx)$/,
-      //   exclude: /node_modules/,
-      //   use: ["awesome-typescript-loader"],
-      // },
       {
         test: /\.(css)$/,
         use: ["style-loader", "css-loader", "postcss-loader"],
