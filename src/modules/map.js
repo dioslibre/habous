@@ -114,33 +114,6 @@ export function create() {
       zoom: map.getZoom(),
     });
   });
-
-  map.on("load", () => {
-    map.addLayer({
-      id: "properties",
-      type: "fill",
-      source: "mapbox-gl-draw-cold",
-      paint: {
-        "fill-color": "#0f62fe",
-        "fill-opacity": [
-          "case",
-          ["boolean", ["feature-state", "hover"], false],
-          0.6,
-          0.1,
-        ],
-      },
-    });
-
-    map.addLayer({
-      id: "properties-contour",
-      type: "line",
-      source: "mapbox-gl-draw-cold",
-      paint: {
-        "line-color": "#0f62fe",
-        "line-width": 3,
-      },
-    });
-  });
 }
 
 $geometries?.watch((payload) => {
@@ -173,11 +146,21 @@ $geometries?.watch((payload) => {
 
 export const colorize = (name, attributes) => {
   const palette = getColorPaletteForAttributes(name, attributes);
-  map.setPaintProperty(
-    "gl-draw-polygon-fill-inactive.cold",
-    "fill-color",
-    palette
-  );
+  map
+    .getStyle()
+    .layers.filter((e) => e.id.includes("inactive"))
+    .forEach((layer) => {
+      try {
+        map.setPaintProperty(layer.id, "fill-color", palette);
+      } catch (e) {
+        //
+      }
+      try {
+        map.setPaintProperty(layer.id, "line-color", palette);
+      } catch (e) {
+        //
+      }
+    });
 };
 
 export function destroy() {
@@ -190,6 +173,8 @@ async function selectionChanged(e) {
     if (draw.getMode() === "simple_select") propertyChanged(null);
     return;
   }
+
+  console.log(f);
 
   const id = f.properties?._id;
   if (id === $property.getState()?._id) return;

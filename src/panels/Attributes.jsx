@@ -192,6 +192,11 @@ const AttributeManager = ({ field }) => {
     attributeOpenEvents[field + "Changed"](!open);
   }, [field, open]);
 
+  const paint = useCallback(
+    () => colorize(field, attributes),
+    [field, attributes]
+  );
+
   return (
     <>
       <div className="flex flex-row h-12">
@@ -207,12 +212,7 @@ const AttributeManager = ({ field }) => {
         <Button size="sm" kind="ghost" className="" onClick={add}>
           <Add20 className="float-right ml-auto mr-0" slot="icon" />
         </Button>
-        <Button
-          size="sm"
-          kind="ghost"
-          className=""
-          onClick={() => colorize(field, attributes)}
-        >
+        <Button size="sm" kind="ghost" className="" onClick={paint}>
           <PaintBrush20 className="float-right ml-auto mr-0" slot="icon" />
         </Button>
       </div>
