@@ -1,11 +1,12 @@
 import { combine, createEvent, createStore } from "effector";
 import { create } from "./db";
-import { transformOneToLocal } from "./utils";
+import { map } from "./map";
+import { transformArrayToWorld, transformOneToLocal } from "./utils";
 
 // tab
 export const tabChanged = createEvent();
 export const $tab = createStore(0).on(tabChanged, (_, payload) => payload);
-// $tab.watch(console.log);
+// $tab?.watch(console.log);
 
 // property
 export const PropertyFields = [
@@ -37,17 +38,29 @@ PropertyFields.forEach((name) => {
     propertyEvents[name + "Changed"],
     (_, payload) => payload
   );
-  // propertyStores["$" + name].watch(console.log);
+  // propertyStores["$" + name]?.watch(console.log);
 });
 export const $propertyCombined = combine(propertyStores);
 
 export const propertyChanged = createEvent();
 export const $property = createStore(null).on(
   propertyChanged,
-  (_, payload) => payload
+  (state, payload) => {
+    if (map && payload?.Coordonnées?.length && state?._id !== payload?._id) {
+      const coordinates = transformArrayToWorld(payload.Coordonnées);
+      let bounds = coordinates.reduce(function (b, coord) {
+        return b.extend(coord);
+      }, new window.mapboxgl.LngLatBounds(coordinates[0], coordinates[1]));
+
+      map.fitBounds(bounds, {
+        padding: 200,
+      });
+    }
+    return payload;
+  }
 );
 
-$property.watch((payload) => {
+$property?.watch((payload) => {
   if (!payload) {
     PropertyFields.forEach((key) => {
       propertyEvents[key + "Changed"](null);
@@ -89,7 +102,7 @@ attributeFields.forEach((name) => {
     attributeEvents[name + "Changed"],
     (_, payload) => payload
   );
-  // attributeStores["$" + name].watch(console.log);
+  // attributeStores["$" + name]?.watch(console.log);
 });
 
 export const attributeOpenEvents = {};
@@ -102,7 +115,7 @@ attributeFields.forEach((name) => {
     attributeOpenEvents[name + "Changed"],
     (_, payload) => payload
   );
-  // attributeOpenStores["$" + name].watch(console.log);
+  // attributeOpenStores["$" + name]?.watch(console.log);
 });
 export const attributeChanged = createEvent();
 export const $attribute = createStore(null).on(
@@ -111,7 +124,7 @@ export const $attribute = createStore(null).on(
     return payload;
   }
 );
-$attribute.watch(console.log);
+$attribute?.watch(console.log);
 // session
 export const sessionChanged = createEvent();
 export const $session = createStore(null).on(
@@ -121,7 +134,7 @@ export const $session = createStore(null).on(
     return payload;
   }
 );
-//$session.watch(console.log);
+//$session?.watch(console.log);
 
 // auth
 const authFields = ["sessionType", "ip", "name", "password"];
@@ -133,7 +146,7 @@ authFields.forEach((name) => {
     authEvents[name + "Changed"],
     (_, payload) => payload
   );
-  // authStores["$" + name].watch(console.log);
+  // authStores["$" + name]?.watch(console.log);
 });
 export const $auth = combine(authStores);
 
@@ -147,12 +160,12 @@ userFields.forEach((name) => {
     userEvents[name + "Changed"],
     (_, payload) => payload
   );
-  userStores[name].watch(console.log);
+  userStores[name]?.watch(console.log);
 });
 export const $userCombined = combine(userStores);
 export const userChanged = createEvent();
 export const $user = createStore(null).on(userChanged, (_, payload) => payload);
-$user.watch((payload) => {
+$user?.watch((payload) => {
   userFields.forEach((key) => {
     if (!payload) return;
     if (payload[key]) userEvents[key + "Changed"](payload[key]);
@@ -196,7 +209,7 @@ searchFields.forEach((name) => {
   );
 });
 export const $search = combine(searchStores);
-$search.watch(console.log);
+$search?.watch(console.log);
 
 // session
 export const propertiesChanged = createEvent();
@@ -207,7 +220,7 @@ export const $properties = createStore(null).on(
     return payload;
   }
 );
-// $properties.watch(console.log);
+// $properties?.watch(console.log);
 
 // geom
 export const geometriesChanged = createEvent();
@@ -256,6 +269,13 @@ export const centerChanged = createEvent();
 export const $centerProjected = createStore(
   transformOneToLocal($view.getState().center)
 ).on(centerChanged, (_, payload) => payload);
-$view.watch((view) => {
+$view?.watch((view) => {
   centerChanged(transformOneToLocal(view.center));
 });
+
+// pending
+export const pendingChanged = createEvent();
+export const $pending = createStore(null).on(
+  pendingChanged,
+  (_, payload) => payload
+);

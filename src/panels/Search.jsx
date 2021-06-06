@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import React, { memo, useCallback, useState } from "react";
+import React, { memo, useCallback } from "react";
 import VirtualScroll from "../lib/VirtualScroll";
 import { useStore } from "effector-react";
 import {
@@ -7,7 +7,6 @@ import {
   TextInput,
   MultiSelect,
   TextArea,
-  Loading,
 } from "carbon-components-react";
 import {
   $properties,
@@ -20,6 +19,7 @@ import {
   searchEvents,
   searchStores,
   tabChanged,
+  pendingChanged,
 } from "../modules/store";
 import {
   ArrowRight20,
@@ -227,17 +227,15 @@ const SearchList = () => {
         style={{ borderTop: "1px solid" }}
         className="border-2 border-blue-700 flex flex-row w-full my-2 px-4"
       >
-        <div className="text-base font-bold my-auto">
-          Résultats {properties.length}
+        <div className="text-base font-bold my-auto mr-auto">
+          {properties.length} Propriété(s)
         </div>
-        <Button
-          size="sm"
-          kind="ghost"
-          className="ml-auto my-auto h-12"
-          onClick={clear}
-        >
-          <Close20 className="float-right ml-auto mr-0" slot="icon" />
+        <Button size="sm" kind="ghost" className="my-auto h-12" onClick={clear}>
+          <Close20 className="float-right mr-0" slot="icon" />
         </Button>
+        {/* <Button size="sm" kind="ghost" className="my-auto h-12" onClick={clear}>
+          <Close20 className="float-right mr-0" slot="icon" />
+        </Button> */}
       </div>
       <div style={{ height: "150%" }}>
         <AutoSizer>
@@ -285,21 +283,19 @@ const SearchParams = () => {
 };
 
 const SearchActions = () => {
-  const [pending, setPending] = useState(false);
   const clear = () => {
     Object.keys(searchEvents).forEach((key) => {
       searchEvents[key](null);
     });
   };
   const go = async () => {
-    setPending(true);
+    pendingChanged(true);
     await fetchProperties($search.getState());
-    setPending(false);
+    pendingChanged(false);
   };
 
   return (
     <>
-      {pending && <Loading />}
       <div className="flex flex-row z-10 bg-white p-4">
         <div className="text-base font-bold my-auto">Paramètres</div>
         <Button

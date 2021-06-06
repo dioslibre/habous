@@ -123,36 +123,6 @@ export const getZoomForResolution = (scale, dpi) => {
   );
 };
 
-export function getPositions(point, h, projection, length, dpi) {
-  const projected = proj4(projection, point);
-  const resolution = (length * 10) / 100 / dpi;
-
-  const hmax = {
-    value: Math.floor((projected[0] + h) / length) * length,
-  };
-  hmax.left = (hmax.value - projected[0]) / resolution;
-  const hmin = {
-    value: hmax.value - length,
-  };
-  hmin.left = (hmin.value - projected[0]) / resolution;
-
-  const vmax = {
-    value: Math.floor(projected[1] / length) * length,
-  };
-  vmax.left = (-vmax.value + projected[1]) / resolution;
-  const vmin = {
-    value: vmax.value - length,
-  };
-  vmin.left = (-vmin.value + projected[1]) / resolution;
-
-  return {
-    hmax,
-    hmin,
-    vmax,
-    vmin,
-  };
-}
-
 export const transformMultiPolygon = (coords, from, to) => {
   const transformed = coords.map((a) =>
     a.map((e) =>
@@ -178,24 +148,6 @@ export const transformOneToLocal = (a) => {
 
 export const transformOneToWorld = (a) => {
   return proj4("EPSG:26191", "EPSG:4326", a);
-};
-
-export const updateTiles = (map) => {
-  map.getSource("data").tiles = [
-    "http://localhost:7800/public.parents_fill/{z}/{x}/{y}.pbf?update=" +
-      Math.random(),
-  ];
-  map.style.sourceCaches["data"].clearTiles();
-  map.style.sourceCaches["data"].update(map.transform);
-
-  map.getSource("data-centroid").tiles = [
-    "http://localhost:7800/public.parents_pole/{z}/{x}/{y}.pbf?update=" +
-      Math.random(),
-  ];
-  map.style.sourceCaches["data-centroid"].clearTiles();
-  map.style.sourceCaches["data-centroid"].update(map.transform);
-
-  map.triggerRepaint();
 };
 
 export const setLayerSource = (map, layerId, source, sourceLayer) => {
@@ -355,3 +307,43 @@ export function autofitColumns(ws) {
     column.width = maxWidth;
   });
 }
+const colors = [
+  "#ce521d",
+  "#ca4b89",
+  "#006b89",
+  "#3e2d7e",
+  "#61902c",
+  "#faa31a",
+  "#6e002a",
+  "#4981b3",
+  "#980069",
+  "#2dacbf",
+  "#ee1d25",
+  "#9cb46f",
+  "#9a869e",
+  "#ee008c",
+  "#00a895",
+  "#7b181a",
+  "#ffd63c",
+  "#b46638",
+  "#bcd634",
+  "#f4ea00",
+  "#32b6c0",
+  "#e8ac1c",
+  "#ea2d50",
+  "#3c7022",
+  "#0085cc",
+  "#97C83B",
+];
+export const getColorPaletteForAttributes = (name, attributes) => {
+  if (!name?.length) return null;
+  if (!attributes.length) return null;
+  const palette = ["match", ["get", name]];
+  attributes.forEach((a, i) => {
+    palette.push(a._id);
+    palette.push(colors[i] || "white");
+  });
+  palette.push("black");
+  console.log(palette);
+  return palette;
+};

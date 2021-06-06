@@ -220,7 +220,7 @@ export const Measure = () => {
       map?.off("mousemove", ToolCursor);
       geojsonChanged([]);
       setTimeout(() => {
-        map.getSource("geojson")?.setData($geojson.getState());
+        map?.getSource("geojson")?.setData($geojson.getState());
       }, 100);
     }
   }, [on]);

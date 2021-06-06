@@ -1,9 +1,15 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect, useState } from "react";
 import { useStore } from "effector-react";
-import { $property, attributeStores, PropertyFields } from "../modules/store";
+import {
+  $property,
+  attributeStores,
+  PropertyFields,
+  pendingChanged,
+} from "../modules/store";
 import { map } from "../modules/map";
 import jsPDF from "jspdf";
+import { toast } from "react-toastify";
 
 function PrintInfo() {
   const property = useStore($property);
@@ -42,6 +48,7 @@ const MapContainer = ({ toggle }) => {
   const [source, setSource] = useState();
 
   useEffect(() => {
+    pendingChanged(true);
     setSource(map.getCanvas().toDataURL());
     setTimeout(() => {
       window
@@ -57,6 +64,8 @@ const MapContainer = ({ toggle }) => {
           pdf.addImage(data, "png", 0, 0, pdfWidth, pdfHeight);
           pdf.save("Note.pdf");
           toggle(false);
+          toast("Enregistrement réussie", { type: "success", autoClose: 2000 });
+          pendingChanged(false);
         });
     }, 1000);
   }, []);

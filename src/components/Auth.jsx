@@ -1,24 +1,25 @@
 /* eslint-disable react/prop-types */
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef } from "react";
 import {
   $session,
   authEvents,
   authStores,
   sessionChanged,
   usersChanged,
+  pendingChanged,
+  $pending,
 } from "../modules/store";
 import { useStore } from "effector-react";
-import { Loading, Modal, TextInput } from "carbon-components-react";
+import { Modal, TextInput } from "carbon-components-react";
 import { toast } from "react-toastify";
-import { send } from "../modules/utils";
-import { allUsers, usersdb } from "../modules/db";
+import { allUsers } from "../modules/db";
 
 function Auth() {
   const session = useStore($session);
-  const [pending, setPending] = useState(false);
+  const pending = useStore($pending);
 
-  const authenticate = async ({ name, password }) => {
-    setPending(true);
+  const authenticate = async () => {
+    pendingChanged(true);
     const users = await allUsers();
     console.log(users);
     const session = users.find(
@@ -30,9 +31,9 @@ function Auth() {
       sessionChanged(session);
       usersChanged(users);
       toast("Bienvenue", { type: "success", autoClose: 2000 });
-      setPending(false);
+      pendingChanged(false);
     } else {
-      setPending(false);
+      pendingChanged(false);
       toast("Erreur Login", { type: "error", autoClose: 2000 });
     }
   };
@@ -41,13 +42,13 @@ function Auth() {
 
   return (
     <>
-      {pending && <Loading />}
       <Modal
         open
         modalHeading="Portail SIG-Habous"
         modalLabel="Authentification"
         primaryButtonText="Se Connecter"
         shouldSubmitOnEnter
+        primaryButtonDisabled={pending}
         hasForm
         onRequestSubmit={authenticate}
         preventCloseOnClickOutside
@@ -85,8 +86,8 @@ function Auth() {
                 width="300"
                 height="300"
               />
-              <Name pending={pending} />
-              <Password pending={pending} />
+              <Name />
+              <Password />
             </div>
           </div>
         </div>
@@ -95,9 +96,10 @@ function Auth() {
   );
 }
 
-function Name({ pending }) {
+function Name() {
   const ref = useRef();
   const value = useStore(authStores.$name);
+  const pending = useStore($pending);
 
   useEffect(() => {
     if (!ref?.current) return;
@@ -119,8 +121,9 @@ function Name({ pending }) {
   );
 }
 
-function Password({ pending }) {
+function Password() {
   const value = useStore(authStores.$password);
+  const pending = useStore($pending);
 
   return (
     <div className="flex flex-row mb-2">

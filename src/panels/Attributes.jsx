@@ -6,6 +6,7 @@ import {
   Checkmark20,
   Close20,
   Edit20,
+  PaintBrush20,
   TrashCan20,
 } from "@carbon/icons-react";
 import { Button, Loading, TextInput, Tile } from "carbon-components-react";
@@ -13,6 +14,7 @@ import { useStore } from "effector-react";
 import React, { useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { db, allAttributes } from "../modules/db";
+import { colorize } from "../modules/map";
 import {
   attributeStores,
   attributeFields,
@@ -21,6 +23,7 @@ import {
   attributeChanged,
   attributeEvents,
   $attribute,
+  pendingChanged,
 } from "../modules/store";
 
 const Attributes = () => {
@@ -137,10 +140,9 @@ const AttributeEntry = ({ attribute, remove, edit }) => {
 const AttributeManager = ({ field }) => {
   const attributes = useStore(attributeStores["$" + field]);
   const open = useStore(attributeOpenStores["$" + field]);
-  const [pending, setPending] = useState();
 
   const edit = async (_id, name) => {
-    setPending(true);
+    pendingChanged(true);
     let existing = _id && _id !== "new" ? await db.get(_id) : { type: field };
     existing = { ...existing, name };
     const func = existing._id ? "put" : "post";
@@ -148,13 +150,13 @@ const AttributeManager = ({ field }) => {
       .then(async () => {
         toast("Enregistrement réussie", { type: "success", autoClose: 2000 });
         await allAttributes();
-        setPending(false);
+        pendingChanged(false);
       })
       .catch(async (e) => {
         console.log(e);
         await allAttributes();
         toast("Erreur d'enregistrement", { type: "error", autoClose: 2000 });
-        setPending(false);
+        pendingChanged(false);
       });
   };
 
@@ -169,20 +171,20 @@ const AttributeManager = ({ field }) => {
       allAttributes();
       return;
     }
-    setPending(true);
+    pendingChanged(true);
     let existing = await db.get(_id);
     existing = { ...existing, _deleted: true };
     db.put(existing)
       .then(async () => {
         toast("Suppression réussie", { type: "success", autoClose: 2000 });
         await allAttributes();
-        setPending(false);
+        pendingChanged(false);
       })
       .catch(async (e) => {
         console.log(e);
         toast("Erreur de Suppression", { type: "error", autoClose: 2000 });
         await allAttributes();
-        setPending(false);
+        pendingChanged(false);
       });
   };
 
@@ -192,7 +194,6 @@ const AttributeManager = ({ field }) => {
 
   return (
     <>
-      {pending && <Loading />}
       <div className="flex flex-row h-12">
         <Button size="sm" kind="ghost" className="pl-2" onClick={toggle}>
           {!open && (
@@ -202,9 +203,17 @@ const AttributeManager = ({ field }) => {
             <CaretDown20 className="float-right ml-auto mr-0" slot="icon" />
           )}
         </Button>
-        <div className="text-base font-bold my-auto">{field}</div>
-        <Button size="sm" kind="ghost" className="ml-auto" onClick={add}>
+        <div className="text-base font-bold my-auto mr-auto">{field}</div>
+        <Button size="sm" kind="ghost" className="" onClick={add}>
           <Add20 className="float-right ml-auto mr-0" slot="icon" />
+        </Button>
+        <Button
+          size="sm"
+          kind="ghost"
+          className=""
+          onClick={() => colorize(field, attributes)}
+        >
+          <PaintBrush20 className="float-right ml-auto mr-0" slot="icon" />
         </Button>
       </div>
       {open &&

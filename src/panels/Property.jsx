@@ -9,7 +9,6 @@ import {
   Dropdown,
   TextArea,
   Tile,
-  Loading,
 } from "carbon-components-react";
 import {
   $coordinates,
@@ -25,6 +24,7 @@ import {
   PropertyFields,
   propertyStores,
   tabChanged,
+  pendingChanged,
 } from "../modules/store";
 import { draw, map } from "../modules/map";
 import {
@@ -95,12 +95,7 @@ function Regime() {
         onChange={(event) => propertyEvents["Régime foncierChanged"](event)}
       >
         {["Titre foncier", "Réquisition", "Non immatriculé"].map((r) => (
-          <RadioButton
-            key={r}
-            className="mr-3 mb-2"
-            defaultValue={r}
-            labelText={r}
-          />
+          <RadioButton key={r} className="mr-3 mb-2" value={r} labelText={r} />
         ))}
       </RadioButtonGroup>
     </div>
@@ -120,12 +115,7 @@ function Statut() {
         onChange={(event) => propertyEvents["StatutChanged"](event)}
       >
         {["En possession", "Vendue"].map((r) => (
-          <RadioButton
-            key={r}
-            className="mr-3 mb-2"
-            defaultValue={r}
-            labelText={r}
-          />
+          <RadioButton key={r} className="mr-3 mb-2" value={r} labelText={r} />
         ))}
       </RadioButtonGroup>
     </div>
@@ -311,7 +301,6 @@ const PropertyEditor = () => {
 };
 
 const FileManager = ({ property }) => {
-  const [pending, setPending] = useState();
   const ref = useRef();
 
   function click() {
@@ -321,7 +310,7 @@ const FileManager = ({ property }) => {
   const upload = useCallback(
     async (files) => {
       if (!files?.length) return;
-      setPending(true);
+      pendingChanged(true);
       let existing = await getRecord(property._id);
       var file = files[0]; // file is a Blob
       const attachment = {
@@ -335,27 +324,27 @@ const FileManager = ({ property }) => {
       await fetchProperties($search.getState());
       existing = await getRecord(property._id);
       propertyChanged(existing);
-      setPending(false);
+      pendingChanged(false);
     },
     [property]
   );
 
   const remove = useCallback(
     async (name) => {
-      setPending(true);
+      pendingChanged(true);
       let existing = await getRecord(property._id);
       await db.removeAttachment(existing._id, name, existing._rev);
       await fetchProperties($search.getState());
       existing = await getRecord(property._id);
       propertyChanged(existing);
-      setPending(false);
+      pendingChanged(false);
     },
     [property]
   );
 
   const edit = useCallback(
     async (name, kind) => {
-      setPending(true);
+      pendingChanged(true);
       let existing = await getRecord(property._id);
       existing.attachmentTypes = existing.attachmentTypes ?? {};
       existing.attachmentTypes = {
@@ -366,14 +355,13 @@ const FileManager = ({ property }) => {
       await fetchProperties($search.getState());
       existing = await getRecord(property._id);
       propertyChanged(existing);
-      setPending(false);
+      pendingChanged(false);
     },
     [property]
   );
 
   return (
     <div className="mb-14">
-      {pending && <Loading />}
       <input
         className="hidden"
         ref={ref}
@@ -396,7 +384,6 @@ const FileManager = ({ property }) => {
               name={f}
               length={property._attachments[f].length}
               kind={property.attachmentTypes && property.attachmentTypes[f]}
-              setPending={setPending}
               remove={remove}
               edit={edit}
             />
@@ -405,7 +392,7 @@ const FileManager = ({ property }) => {
   );
 };
 
-const FileEntry = ({ length, kind, name, _id, setPending, remove, edit }) => {
+const FileEntry = ({ length, kind, name, _id, remove, edit }) => {
   const items = useStore(attributeStores["$TypeDeDocument"]);
   const [hover, setHover] = useState(false);
   const [removeFile, setRemoveFile] = useState(false);
@@ -413,11 +400,11 @@ const FileEntry = ({ length, kind, name, _id, setPending, remove, edit }) => {
   const [newkind, setKind] = useState(kind);
 
   const download = async () => {
-    setPending(true);
+    pendingChanged(true);
     const blob = await db.getAttachment(_id, name);
     const url = URL.createObjectURL(blob);
     window.saveAs(url, name);
-    setPending(false);
+    pendingChanged(false);
   };
 
   const go = useCallback(
@@ -525,38 +512,29 @@ const FileEntry = ({ length, kind, name, _id, setPending, remove, edit }) => {
   );
 };
 
-const PropertyActions = ({ editData, setEditData }) => {
+const PropertyActions = ({ editData, setEditData, toggle }) => {
   const editGeom = useStore($editGeom);
-  const [pending, setPending] = useState(false);
   const [removeData, setRemoveData] = useState(false);
-  const ref = useRef(null);
-  const [show, toggle] = useToggle(false);
   const save = async () => {
-    setPending(true);
+    pendingChanged(true);
     const edited = (await getRecord($property.getState()._id)) ?? {};
     PropertyFields.forEach((key) => {
       edited[key] = propertyStores["$" + key].getState();
     });
-
-    if (
-      propertyStores["$Coordonnées"].getState()?.length > 0 &&
-      propertyStores["$Coordonnées"].getState()?.length < 4
-    ) {
+    const coords = propertyStores["$Coordonnées"].getState();
+    if (coords?.length > 0 && coords?.length < 4) {
       toast("Nombre de Points insuffisant", { type: "error", autoClose: 2000 });
-      setPending(false);
+      pendingChanged(false);
       return;
-    } else if (propertyStores["$Coordonnées"].getState()?.length > 4) {
-      const p1 = propertyStores["$Coordonnées"][0];
-      const p2 =
-        propertyStores["$Coordonnées"][
-          propertyStores["$Coordonnées"].length - 1
-        ];
+    } else if (coords?.length > 4) {
+      const p1 = coords[0];
+      const p2 = coords[coords.length - 1];
       if (Math.abs(p1[0] - p2[0] > 0.01) || Math.abs(p1[1] - p2[1]) > 0.01) {
         toast("les premier et dernier points sont differents", {
           type: "error",
           autoClose: 2000,
         });
-        setPending(false);
+        pendingChanged(false);
         return;
       }
     }
@@ -567,16 +545,16 @@ const PropertyActions = ({ editData, setEditData }) => {
         propertyChanged(edited);
         toast("Enregistrement réussie", { type: "success", autoClose: 2000 });
         setEditData(false);
-        setPending(false);
+        pendingChanged(false);
       })
       .catch((e) => {
         console.log(e);
         toast("Erreur d'enregistrement", { type: "error", autoClose: 2000 });
-        setPending(false);
+        pendingChanged(false);
       });
   };
   const remove = async () => {
-    setPending(true);
+    pendingChanged(true);
     const deleted = (await getRecord($property.getState()._id)) ?? {};
     deleted._deleted = true;
     saveRecord(deleted)
@@ -588,16 +566,16 @@ const PropertyActions = ({ editData, setEditData }) => {
         geometriesChanged(geoms);
         toast("Suppression réussie", { type: "success", autoClose: 2000 });
         tabChanged(0);
-        setPending(false);
+        pendingChanged(false);
       })
       .catch((e) => {
         console.log(e);
         toast("Erreur de Suupression", { type: "error", autoClose: 2000 });
-        setPending(false);
+        pendingChanged(false);
       });
   };
   async function onUpdateGeometry(e) {
-    setPending(true);
+    pendingChanged(true);
     const f = e.features[0];
     const coords = f.geometry.coordinates[0];
     const transformed = transformArrayToLocal(coords);
@@ -608,21 +586,21 @@ const PropertyActions = ({ editData, setEditData }) => {
     );
     await saveRecord(res);
     propertyChanged(res);
-    setPending(false);
+    pendingChanged(false);
   }
   async function onDeleteGeometry(e) {
-    setPending(true);
+    pendingChanged(true);
     const f = e.features[0];
     const _id = f.properties._id;
     const res = await getRecord(_id);
     res.Coordonnées = undefined;
     await saveRecord(res);
     propertyChanged(res);
-    setPending(false);
+    pendingChanged(false);
   }
   const onCreateGeometry = async function (e) {
     if (!$editGeom.getState()) return;
-    setPending(true);
+    pendingChanged(true);
     const f = e.features[0];
     const coords = f.geometry.coordinates[0];
     const transformed = transformArrayToLocal(coords);
@@ -636,7 +614,7 @@ const PropertyActions = ({ editData, setEditData }) => {
     geometriesChanged(geoms);
     propertyChanged(res);
     draw.changeMode("simple_select", { featureIds: [res._id] });
-    setPending(false);
+    pendingChanged(false);
   };
   const subscribe = () => {
     setTimeout(() => {
@@ -656,8 +634,6 @@ const PropertyActions = ({ editData, setEditData }) => {
     return unsubscribe;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  if (pending) return <Loading />;
 
   return (
     <div
@@ -703,22 +679,16 @@ const PropertyActions = ({ editData, setEditData }) => {
         </>
       )}
       {!editData && !editGeom && (
-        <>
-          <Button
-            kind="ghost"
-            className="mt-4 bg-white mx-auto w-1/2 pr-4"
-            onClick={() => printChanged(false) & toggle(true)}
-          >
-            <div className="flex flex-row w-full">
-              Imprimer{" "}
-              <Printer20 className="float-right ml-auto mr-0" slot="icon" />
-            </div>
-          </Button>
-
-          <div ref={ref} style={{ backgroundColor: "black" }}>
-            {show ? <Print toggle={toggle} /> : null}
+        <Button
+          kind="ghost"
+          className="mt-4 bg-white mx-auto w-1/2 pr-4"
+          onClick={() => printChanged(false) & toggle(true)}
+        >
+          <div className="flex flex-row w-full">
+            Imprimer{" "}
+            <Printer20 className="float-right ml-auto mr-0" slot="icon" />
           </div>
-        </>
+        </Button>
       )}
       {(editData || editGeom) && (
         <Button
@@ -797,6 +767,8 @@ const Property = () => {
   const property = useStore($property);
   const [editData, setEditData] = useState(false);
   const editGeom = useStore($editGeom);
+  const ref = useRef(null);
+  const [show, toggle] = useToggle(false);
 
   useEffect(() => {
     editGeomChanged(false);
@@ -816,8 +788,11 @@ const Property = () => {
     <>
       <PropertyData {...{ property, editData, setEditData }} />
       <PropertyGeometry {...{ property }} />
-      <PropertyActions {...{ editData, setEditData }} />
       <FileManager property={property} />
+      <PropertyActions {...{ editData, setEditData, toggle }} />
+      <div ref={ref} style={{ backgroundColor: "black" }}>
+        {show ? <Print toggle={toggle} /> : null}
+      </div>
     </>
   );
 };

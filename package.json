@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "set NODE_ENV=development && webpack serve --config ./webpack.config.js --mode development --port 3000",
-    "build": "set NODE_ENV=production && webpack --config ./webpack.config.production.js --mode production"
+    "start": "set NODE_ENV=development&&webpack serve --config ./webpack.config.js --mode development --port 3000",
+    "build": "set NODE_ENV=production&&webpack --config ./webpack.config.production.js --mode production"
   },
   "keywords": [],
   "author": "",
@@ -14,28 +14,22 @@
     "@carbon/icons-react": "^10.32.0",
     "@carbon/themes": "^10.35.0",
     "autoprefixer": "^10.2.6",
-    "axios": "^0.21.1",
     "carbon-components": "^10.35.0",
     "carbon-components-react": "^7.35.0",
     "carbon-icons": "^7.0.7",
-    "d3-format": "^3.0.0",
-    "d3-scale": "^3.3.0",
     "effector": "^21.8.11",
     "effector-react": "^21.3.2",
     "exceljs": "^4.2.1",
     "jspdf": "^2.3.1",
-    "lodash.debounce": "^4.0.8",
     "proj4": "^2.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
-    "react-full-screen": "^1.0.2",
-    "react-tiny-virtual-list": "^2.2.0",
     "react-toastify": "^7.0.4",
     "react-use": "^17.2.4",
-    "react-virtualized-auto-sizer": "^1.0.5",
-    "sass": "1.32.13"
+    "react-virtualized-auto-sizer": "^1.0.5"
   },
   "devDependencies": {
+    "sass": "1.32.13",
     "@babel/core": "^7.13.8",
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/preset-env": "^7.13.9",

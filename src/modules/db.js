@@ -51,16 +51,29 @@ export async function create() {
 }
 
 export const allAttributes = async () => {
-  const promises = [];
-  attributeFields.forEach(async (element) => {
-    promises.push(
-      allofType(element).then((res) =>
-        attributeEvents[element + "Changed"](res)
-      )
-    );
-  });
-  return window.Promise.all(promises);
+  const Unité = await allofType("Unité");
+  attributeEvents["UnitéChanged"](Unité);
+  await sleep(200);
+  const Conservation = await allofType("Conservation");
+  attributeEvents["ConservationChanged"](Conservation);
+  await sleep(200);
+  const Propriétaire = await allofType("Propriétaire");
+  attributeEvents["PropriétaireChanged"](Propriétaire);
+  await sleep(200);
+  const Consistance = await allofType("Consistance");
+  attributeEvents["ConsistanceChanged"](Consistance);
+  await sleep(200);
+  const Affectation = await allofType("Affectation");
+  attributeEvents["AffectationChanged"](Affectation);
+  await sleep(200);
+  const TypeDeDocument = await allofType("TypeDeDocument");
+  attributeEvents["TypeDeDocumentChanged"](TypeDeDocument);
+  await sleep(200);
 };
+
+function sleep(ms) {
+  return new window.Promise((resolve) => setTimeout(resolve, ms));
+}
 
 export function destroy() {
   db?.close();

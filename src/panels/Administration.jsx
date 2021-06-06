@@ -1,8 +1,8 @@
 import { Download20, Upload20 } from "@carbon/icons-react";
-import { Button, Loading } from "carbon-components-react";
-import React, { useRef, useState } from "react";
+import { Button } from "carbon-components-react";
+import React, { useRef } from "react";
 import { toast } from "react-toastify";
-import { attributeFields } from "../modules/store";
+import { attributeFields, pendingChanged } from "../modules/store";
 import { bulkRecords } from "../modules/db";
 import UserManager from "./UserManager";
 
@@ -16,7 +16,6 @@ export const attributeArrays = {
 
 const Administration = () => {
   const ref = useRef();
-  const [pending, setPending] = useState();
   function click() {
     ref.current.click();
   }
@@ -24,7 +23,7 @@ const Administration = () => {
     var output = ""; //placeholder for text output
     const reader = new FileReader();
     if (files[0]) {
-      setPending(true);
+      pendingChanged(true);
       reader.onload = async function (e) {
         try {
           output = e.target.result;
@@ -83,16 +82,16 @@ const Administration = () => {
 
           bulkRecords(data.filter((e) => !!e))
             .then(() => {
-              setPending(false);
+              pendingChanged(false);
               toast("Sauvegarde réussie", { type: "success", autoClose: 2000 });
             })
             .catch((e) => {
-              setPending(false);
+              pendingChanged(false);
               console.log(e);
               toast("Erreur Sauvegarde", { type: "error", autoClose: 2000 });
             });
         } catch (e) {
-          setPending(false);
+          pendingChanged(false);
           console.log(e);
           toast("Erreur Fichier", { type: "error", autoClose: 2000 });
         }
@@ -109,7 +108,6 @@ const Administration = () => {
 
   return (
     <>
-      {pending && <Loading />}
       <div className="flex flex-col h-12">
         <input
           className="hidden"

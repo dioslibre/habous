@@ -9,14 +9,16 @@ import {
   viewChanged,
   $baseLayer,
 } from "./store";
-import { getScreenDpi, setLayerSource, transformArrayToWorld } from "./utils";
-
+import {
+  getColorPaletteForAttributes,
+  getScreenDpi,
+  setLayerSource,
+  transformArrayToWorld,
+} from "./utils";
 const mapboxgl = window.mapboxgl;
-
 const NewSimpleSelect = Object.assign(window.MapboxDraw.modes.simple_select, {
   dragMove() {},
 });
-
 const NewDirectSelect = Object.assign(window.MapboxDraw.modes.direct_select, {
   dragFeature() {},
 });
@@ -112,10 +114,36 @@ export function create() {
       zoom: map.getZoom(),
     });
   });
+
+  map.on("load", () => {
+    map.addLayer({
+      id: "properties",
+      type: "fill",
+      source: "mapbox-gl-draw-cold",
+      paint: {
+        "fill-color": "#0f62fe",
+        "fill-opacity": [
+          "case",
+          ["boolean", ["feature-state", "hover"], false],
+          0.6,
+          0.1,
+        ],
+      },
+    });
+
+    map.addLayer({
+      id: "properties-contour",
+      type: "line",
+      source: "mapbox-gl-draw-cold",
+      paint: {
+        "line-color": "#0f62fe",
+        "line-width": 3,
+      },
+    });
+  });
 }
 
-$geometries.watch((payload) => {
-  console.log("here");
+$geometries?.watch((payload) => {
   draw?.set({
     type: "FeatureCollection",
     features: [],
@@ -123,7 +151,6 @@ $geometries.watch((payload) => {
   if (!payload?.length) {
     return;
   }
-  console.log(payload);
   const features = payload
     .filter((e) => e.Coordonnées.length > 3)
     .map((e) => ({
@@ -141,8 +168,17 @@ $geometries.watch((payload) => {
       type: "FeatureCollection",
       features,
     });
-  }, 599);
+  }, 100);
 });
+
+export const colorize = (name, attributes) => {
+  const palette = getColorPaletteForAttributes(name, attributes);
+  map.setPaintProperty(
+    "gl-draw-polygon-fill-inactive.cold",
+    "fill-color",
+    palette
+  );
+};
 
 export function destroy() {
   map.remove();
@@ -153,16 +189,17 @@ async function selectionChanged(e) {
   if (!f) {
     if (draw.getMode() === "simple_select") propertyChanged(null);
     return;
-  } else {
-    const id = f.properties?._id;
-    if (id === $property.getState()?._id) return;
-    if (!id) return;
-    const res = await getRecord(id);
-    propertyChanged(res);
   }
+
+  const id = f.properties?._id;
+  if (id === $property.getState()?._id) return;
+  if (!id) return;
+  propertyChanged(f.properties);
+  const property = await getRecord(id);
+  propertyChanged(property);
 }
 
-$property.watch((payload) => {
+$property?.watch((payload) => {
   console.log(payload);
   if (!payload) return;
   try {
@@ -174,7 +211,7 @@ $property.watch((payload) => {
   }
 });
 
-$baseLayer.watch((state) => {
+$baseLayer?.watch((state) => {
   if (!map) return;
   setLayerSource(map, "google", state);
 });
@@ -284,7 +321,7 @@ export const MeasureTool = function (e) {
 
   geojsonChanged(fs);
   setTimeout(() => {
-    map.getSource("geojson").setData($geojson.getState());
+    map?.getSource("geojson").setData($geojson.getState());
   }, 50);
 };
 

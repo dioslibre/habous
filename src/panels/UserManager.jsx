@@ -6,7 +6,6 @@ import {
   RadioButtonGroup,
   RadioButton,
   Button,
-  Loading,
   Tile,
 } from "carbon-components-react";
 import {
@@ -16,6 +15,7 @@ import {
   usersChanged,
   userFields,
   userStores,
+  pendingChanged,
 } from "../modules/store";
 import {
   Add20,
@@ -65,12 +65,7 @@ function Role({ value }) {
         onChange={(event) => userEvents["roleChanged"](event)}
       >
         {["Administrateur", "Utilisateur"].map((r) => (
-          <RadioButton
-            key={r}
-            className="mr-3 mb-2"
-            defaultValue={r}
-            labelText={r}
-          />
+          <RadioButton key={r} className="mr-3 mb-2" value={r} labelText={r} />
         ))}
       </RadioButtonGroup>
     </div>
@@ -105,10 +100,9 @@ const UserEditor = ({ user }) => {
 const UserManager = () => {
   const users = useStore($users);
   console.log(users);
-  const [pending, setPending] = useState();
 
   const edit = async (user) => {
-    setPending(true);
+    pendingChanged(true);
     let existing =
       user._id && user._id !== "new"
         ? await usersdb.get(user._id)
@@ -119,13 +113,13 @@ const UserManager = () => {
       .then(async () => {
         toast("Enregistrement réussie", { type: "success", autoClose: 2000 });
         await allUsers();
-        setPending(false);
+        pendingChanged(false);
       })
       .catch(async (e) => {
         console.log(e);
         await allUsers();
         toast("Erreur d'enregistrement", { type: "error", autoClose: 2000 });
-        setPending(false);
+        pendingChanged(false);
       });
   };
 
@@ -139,7 +133,7 @@ const UserManager = () => {
       allUsers();
       return;
     }
-    setPending(true);
+    pendingChanged(true);
     let existing = await usersdb.get(user._id);
     existing = { ...existing, _deleted: true };
     usersdb
@@ -147,19 +141,18 @@ const UserManager = () => {
       .then(async () => {
         toast("Enregistrement réussie", { type: "success", autoClose: 2000 });
         await allUsers();
-        setPending(false);
+        pendingChanged(false);
       })
       .catch(async (e) => {
         console.log(e);
         toast("Erreur d'enregistrement", { type: "error", autoClose: 2000 });
         await allUsers();
-        setPending(false);
+        pendingChanged(false);
       });
   };
 
   return (
     <div className="mb-14">
-      {pending && <Loading />}
       <div className="flex flex-row mb-2 h-12">
         <div className="text-base font-bold my-auto">Utilisateurs</div>
         <Button size="sm" kind="ghost" className="ml-auto" onClick={add}>
