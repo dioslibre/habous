@@ -4,17 +4,17 @@ export default {
   sources: {
     Carte: {
       type: "raster",
-      tiles: ["http://mt0.google.com/vt/lyrs=r&hl=fr&x={x}&y={y}&z={z}"],
+      tiles: ["https://mt0.google.com/vt/lyrs=r&hl=fr&x={x}&y={y}&z={z}"],
       tileSize: 256,
     },
     Hybride: {
       type: "raster",
-      tiles: ["http://mt0.google.com/vt/lyrs=y&hl=fr&x={x}&y={y}&z={z}"],
+      tiles: ["https://mt0.google.com/vt/lyrs=y&hl=fr&x={x}&y={y}&z={z}"],
       tileSize: 256,
     },
     Satellite: {
       type: "raster",
-      tiles: ["http://mt3.google.com/vt/lyrs=s&hl=fr&x={x}&y={y}&z={z}"],
+      tiles: ["https://mt3.google.com/vt/lyrs=s&hl=fr&x={x}&y={y}&z={z}"],
       tileSize: 256,
     },
   },

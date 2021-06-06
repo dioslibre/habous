@@ -715,11 +715,7 @@ const PropertyActions = ({ editData, setEditData }) => {
             </div>
           </Button>
 
-          <div
-            ref={ref}
-            className={show ? "h-screen w-screen" : undefined}
-            style={{ backgroundColor: "black" }}
-          >
+          <div ref={ref} style={{ backgroundColor: "black" }}>
             {show ? <Print toggle={toggle} /> : null}
           </div>
         </>

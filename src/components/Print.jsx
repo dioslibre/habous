@@ -89,7 +89,7 @@ const Header = () => {
       <div className="flex-grow my-auto">
         <img
           className="w-32"
-          src="/emblem.jpg"
+          src="./emblem.jpg"
           alt="Royaume du Maroc"
           width="4rem"
           height="4rem"

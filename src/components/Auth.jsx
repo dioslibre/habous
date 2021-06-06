@@ -57,7 +57,7 @@ function Auth() {
             <div className="flex flex-col mx-auto">
               <img
                 className="mx-auto"
-                src="/emblem.jpg"
+                src="./emblem.jpg"
                 alt="Royaume du Maroc"
                 width="300"
                 height="300"
@@ -80,7 +80,7 @@ function Auth() {
             <div className="flex flex-col mx-auto w-5/6">
               <img
                 className="mx-auto my-auto mb-4 inve"
-                src="/map.svg"
+                src="./map.svg"
                 alt="Royaume du Maroc"
                 width="300"
                 height="300"
