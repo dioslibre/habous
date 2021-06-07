@@ -9,9 +9,9 @@ import {
   PaintBrush20,
   TrashCan20,
 } from "@carbon/icons-react";
-import { Button, Loading, TextInput, Tile } from "carbon-components-react";
+import { Button, TextInput, Tile } from "carbon-components-react";
 import { useStore } from "effector-react";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { createRef, useCallback, useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { db, allAttributes } from "../modules/db";
 import { colorize } from "../modules/map";
@@ -27,19 +27,24 @@ import {
 } from "../modules/store";
 
 const Attributes = () => {
-  return attributeFields.map((f) => <AttributeManager key={f} field={f} />);
+  return attributeFields
+    .slice(0, attributeFields.length - 2)
+    .map((f) => <AttributeManager key={f} field={f} />);
 };
 
 export default Attributes;
 
 const AttributeEditor = ({ name }) => {
+  const ref = createRef();
+  useEffect(() => setTimeout(() => ref.current.focus()), []);
   return (
     <TextInput
+      ref={ref}
       id={"text-attrib"}
-      defaultValue={name || ""}
+      value={name || ""}
       size="sm"
       light
-      labelText=""
+      labelText="Nom de l'attribut"
       onChange={(event) => attributeChanged(event.target.value)}
     />
   );
@@ -51,8 +56,6 @@ const AttributeEntry = ({ attribute, remove, edit }) => {
   const [editAttribute, setEditAttribute] = useState(
     !attribute._id || attribute._id === "new"
   );
-
-  useEffect(() => attributeChanged(""), [editAttribute]);
 
   return (
     <>
@@ -89,9 +92,12 @@ const AttributeEntry = ({ attribute, remove, edit }) => {
             kind="ghost"
             size="sm"
             className="w-auto h-12 my-auto"
-            onClick={() =>
-              allAttributes().then(() => setRemoveAttribute(false))
-            }
+            onClick={() => {
+              pendingChanged(true);
+              allAttributes().then(
+                () => pendingChanged(false) & setRemoveAttribute(false)
+              );
+            }}
           >
             <Close20 slot="icon" />
           </Button>
@@ -101,9 +107,12 @@ const AttributeEntry = ({ attribute, remove, edit }) => {
             kind="danger"
             size="sm"
             className="w-auto h-12 my-auto"
-            onClick={() =>
-              remove(attribute._id).then(() => setRemoveAttribute(false))
-            }
+            onClick={() => {
+              pendingChanged(true);
+              remove(attribute._id).then(
+                () => pendingChanged(false) & setRemoveAttribute(false)
+              );
+            }}
           >
             <Checkmark20 slot="icon" />
           </Button>
@@ -113,7 +122,12 @@ const AttributeEntry = ({ attribute, remove, edit }) => {
             kind="ghost"
             size="sm"
             className="w-auto h-12 my-auto"
-            onClick={() => allAttributes().then(() => setEditAttribute(false))}
+            onClick={() => {
+              pendingChanged(true);
+              allAttributes().then(
+                () => pendingChanged(false) & setEditAttribute(false)
+              );
+            }}
           >
             <Close20 color="red" slot="icon" />
           </Button>
@@ -124,6 +138,7 @@ const AttributeEntry = ({ attribute, remove, edit }) => {
             className="w-auto h-12 my-auto"
             onClick={() => {
               const name = $attribute.getState();
+              console.log(name);
               if (name?.length)
                 edit(attribute._id, name).then(() => setEditAttribute(false));
             }}
@@ -142,6 +157,7 @@ const AttributeManager = ({ field }) => {
   const open = useStore(attributeOpenStores["$" + field]);
 
   const edit = async (_id, name) => {
+    console.log(name);
     pendingChanged(true);
     let existing = _id && _id !== "new" ? await db.get(_id) : { type: field };
     existing = { ...existing, name };
@@ -161,17 +177,25 @@ const AttributeManager = ({ field }) => {
   };
 
   const add = useCallback(
-    () => attributeEvents[field + "Changed"]([{ _id: "new" }, ...attributes]),
+    () => {
+      attributeOpenEvents[field + "Changed"](true);
+      attributeEvents[field + "Changed"]([
+        { _id: "new", name: "Nouvel attribut" },
+        ...attributes,
+      ]);
+      attributeChanged("Nouvel attribut");
+    },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [attributes]
+    [attributes, field]
   );
 
   const remove = async (_id) => {
+    pendingChanged(true);
     if (!_id || _id === "new") {
       allAttributes();
+      pendingChanged(false);
       return;
     }
-    pendingChanged(true);
     let existing = await db.get(_id);
     existing = { ...existing, _deleted: true };
     db.put(existing)
@@ -219,7 +243,7 @@ const AttributeManager = ({ field }) => {
       {open &&
         (attributes || []).map((f) => (
           <AttributeEntry
-            key={f.name}
+            key={f._id}
             attribute={f}
             remove={remove}
             edit={edit}

@@ -1,5 +1,6 @@
 import proj4 from "proj4";
 import { Workbook } from "exceljs";
+import { PropertyFields } from "./store";
 
 proj4.defs(
   "EPSG:26191",
@@ -186,34 +187,19 @@ export const headers = [
 
 export async function saveExcel(data, attributes) {
   const aoa = [
-    headers,
-    ...data.map((e) => {
-      return [
-        (attributes.unit.items.find((v) => v.id === e.unitId) || {}).text || "",
-        e.title,
-        e.label,
-        e.status,
-        e.regime,
-        e.reference,
-        (
-          attributes.conservation.items.find(
-            (v) => v.id === e.conservationId
-          ) || {}
-        ).text || "",
-        (attributes.assign.items.find((v) => v.id === e.assignId) || {}).text ||
-          "",
-        (attributes.nature.items.find((v) => v.id === e.natureId) || {}).text ||
-          "",
-        (attributes.owner.items.find((v) => v.id === e.ownerId) || {}).text ||
-          "",
-        e.area.toFixed(4),
-        e.venale.toFixed(2),
-        e.locative.toFixed(2),
-        Math.floor(e.projected[0]),
-        Math.floor(e.projected[1]),
-        e.address,
-        e.note,
-      ];
+    PropertyFields,
+    ...data.map((prop) => {
+      const p = [];
+      PropertyFields.forEach((e) => {
+        if (!prop[e]) {
+          p.push("");
+          return;
+        }
+        if (attributes[e])
+          p.push(attributes[e].find((a) => a._id === prop[e])?.name || "");
+        else p.push(prop[e]);
+      });
+      return p;
     }),
   ];
 
@@ -338,7 +324,7 @@ const colors = [
 export const getColorPaletteForAttributes = (name, attributes) => {
   if (!name?.length) return null;
   if (!attributes.length) return null;
-  const palette = ["match", ["get", name]];
+  const palette = ["match", ["get", "user_" + name]];
   attributes.forEach((a, i) => {
     palette.push(a._id);
     palette.push(colors[i] || "white");

@@ -23,8 +23,8 @@ const App = () => {
       <div className="h-screen w-screen overflow-hidden flex flex-col">
         {session ? <Shell /> : null}
         <div className="h-full w-screen flex flex-row overflow-hidden flex-grow-default">
-          {session ? <Panel /> : null}
           <Map />
+          {session ? <Panel /> : null}
         </div>
         <ToastContainer />
       </div>

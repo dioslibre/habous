@@ -4,8 +4,6 @@ import { useStore } from "effector-react";
 import {
   Button,
   TextInput,
-  RadioButtonGroup,
-  RadioButton,
   Dropdown,
   TextArea,
   Tile,
@@ -80,51 +78,9 @@ function Requisition() {
     />
   );
 }
-
-function Regime() {
-  const value = useStore(propertyStores["$Régime foncier"]);
-  return (
-    <div>
-      <div className="bx--label">Régime</div>
-      <RadioButtonGroup
-        className="my-2 ml-4 flex flex-row flex-wrap items-center"
-        orientation="horizontal"
-        name={"regime"}
-        defaultSelected={value || ""}
-        light
-        onChange={(event) => propertyEvents["Régime foncierChanged"](event)}
-      >
-        {["Titre foncier", "Réquisition", "Non immatriculé"].map((r) => (
-          <RadioButton key={r} className="mr-3 mb-2" value={r} labelText={r} />
-        ))}
-      </RadioButtonGroup>
-    </div>
-  );
-}
-function Statut() {
-  const value = useStore(propertyStores.$Statut);
-  return (
-    <div>
-      <div className="bx--label">Statut de Possession</div>
-      <RadioButtonGroup
-        className="my-2 ml-4"
-        orientation="horizontal"
-        defaultSelected={value || ""}
-        light
-        name="status"
-        onChange={(event) => propertyEvents["StatutChanged"](event)}
-      >
-        {["En possession", "Vendue"].map((r) => (
-          <RadioButton key={r} className="mr-3 mb-2" value={r} labelText={r} />
-        ))}
-      </RadioButtonGroup>
-    </div>
-  );
-}
 function AttributeCombo({ field }) {
   const items = useStore(attributeStores["$" + field]);
   const attrib = useStore(propertyStores["$" + field]);
-  console.log(attrib);
 
   if (!items) return null;
 
@@ -284,13 +240,16 @@ const PropertyEditor = () => {
       <AttributeCombo field={"Unité"} />
       <Titre />
       <Requisition />
-      <Regime />
-      <Statut />
-      {["Conservation", "Affectation", "Consistance", "Propriétaire"].map(
-        (field) => (
-          <AttributeCombo key={field} field={field} />
-        )
-      )}
+      {[
+        "Régime foncier",
+        "Statut de possession",
+        "Conservation",
+        "Affectation",
+        "Consistance",
+        "Propriétaire",
+      ].map((field) => (
+        <AttributeCombo key={field} field={field} />
+      ))}
       {["Surface", "Valeur locative", "Valeur vénale"].map((field) => (
         <Numbers key={field} field={field} />
       ))}
@@ -393,7 +352,7 @@ const FileManager = ({ property }) => {
 };
 
 const FileEntry = ({ length, kind, name, _id, remove, edit }) => {
-  const items = useStore(attributeStores["$TypeDeDocument"]);
+  const items = useStore(attributeStores["$Type de document"]);
   const [hover, setHover] = useState(false);
   const [removeFile, setRemoveFile] = useState(false);
   const [editFile, setEditFile] = useState(false);

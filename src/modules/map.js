@@ -1,6 +1,7 @@
 import { createEvent, createStore } from "effector";
 import style from "../mapbox";
 import { getRecord } from "./db";
+import { Expression } from "mapbox-expression";
 import {
   propertyChanged,
   $geometries,
@@ -15,7 +16,7 @@ import {
   setLayerSource,
   transformArrayToWorld,
 } from "./utils";
-const mapboxgl = window.mapboxgl;
+import { Map, ScaleControl } from "mapbox-gl";
 const NewSimpleSelect = Object.assign(window.MapboxDraw.modes.simple_select, {
   dragMove() {},
 });
@@ -29,7 +30,7 @@ export let draw = null;
 
 // functions
 export function create() {
-  map = new mapboxgl.Map({
+  map = new Map({
     accessToken:
       "pk.eyJ1Ijoic25pcHIiLCJhIjoiY2pnd3B1Z2xkMGVzbzJ3b2JpdHA3MTgwbSJ9.zyxsmob18-mVbSBsnHUBqw",
     container: "map",
@@ -43,7 +44,7 @@ export function create() {
     ],
   });
 
-  const scale = new mapboxgl.ScaleControl({
+  const scale = new ScaleControl({
     maxWidth: getScreenDpi() * 4,
     unit: "metric",
   });
@@ -85,6 +86,7 @@ export function create() {
 
   draw = new window.MapboxDraw({
     displayControlsDefault: false,
+    userProperties: true,
     controls: {
       polygon: false,
       trash: false,
@@ -161,6 +163,13 @@ export const colorize = (name, attributes) => {
         //
       }
     });
+  const features = map.queryRenderedFeatures();
+  for (let index = 0; index < features.length; index++) {
+    const f = features[index];
+    console.log(f);
+    const res = Expression.parse(palette).evaluate(f);
+    console.log(res);
+  }
 };
 
 export function destroy() {

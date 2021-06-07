@@ -12,6 +12,9 @@ export const attributeArrays = {
   Propriétaire: [],
   Consistance: [],
   Affectation: [],
+  "Statut de possession": [],
+  "Régime foncier": [],
+  "Type de document": [],
 };
 
 const Administration = () => {
@@ -30,6 +33,7 @@ const Administration = () => {
           const ids = [];
           const json = JSON.parse(output);
           attributeFields.forEach((field) => {
+            console.log(field);
             json[field].forEach((f, i) => (f._id = field + i));
           });
           let data = json.data.map((e) => {

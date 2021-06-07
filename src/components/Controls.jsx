@@ -11,6 +11,7 @@ import {
   yChanged,
   $centerProjected,
 } from "../modules/store";
+import { Marker } from "mapbox-gl";
 import { Location20, ArrowRight20, Ruler20 } from "@carbon/icons-react";
 import { transformOneToWorld } from "../modules/utils";
 import {
@@ -129,9 +130,7 @@ const Go = () => {
       marker.remove();
       map.removeLayer(marker);
     }
-    const m = new window.mapboxgl.Marker({ color: "red" })
-      .setLngLat(coordinates)
-      .addTo(map);
+    const m = new Marker({ color: "red" }).setLngLat(coordinates).addTo(map);
     m.getElement().addEventListener(
       "click",
       () => m.remove() & setMarker(null)

@@ -20,15 +20,18 @@ import {
   searchStores,
   tabChanged,
   pendingChanged,
+  attributeFields,
 } from "../modules/store";
 import {
   ArrowRight20,
   Checkmark20,
   Close20,
   Erase20,
+  Save20,
 } from "@carbon/icons-react";
 import { fetchProperties } from "../modules/db";
 import AutoSizer from "react-virtualized-auto-sizer";
+import { saveExcel } from "../modules/utils";
 
 function Titre() {
   const value = useStore(searchStores["$Titre foncier"]);
@@ -61,7 +64,6 @@ function Requisition() {
   );
 }
 function Regime() {
-  const value = useStore(searchStores["$Régimes fonciers"]);
   return (
     <MultiSelect
       itemToString={(item) => item}
@@ -71,16 +73,13 @@ function Regime() {
       size="sm"
       light={true}
       onChange={(event) =>
-        console.log(event) &
         searchEvents["Régimes fonciersChanged"](event.selectedItems)
       }
       items={["Titre foncier", "Réquisition", "Non immatriculé"]}
-      defaultValue={value}
     ></MultiSelect>
   );
 }
 function Statut() {
-  const value = useStore(searchStores.$Statuts);
   return (
     <MultiSelect
       itemToString={(item) => item}
@@ -89,11 +88,8 @@ function Statut() {
       label="Options"
       size="sm"
       light={true}
-      onChange={(event) =>
-        console.log(event) & searchEvents["StatutsChanged"](event.selectedItems)
-      }
+      onChange={(event) => searchEvents["StatutsChanged"](event.selectedItems)}
       items={["En possession", "Vendue"]}
-      defaultValue={value}
     ></MultiSelect>
   );
 }
@@ -101,7 +97,6 @@ function AttributeCombo({ field }) {
   const items = useStore(
     attributeStores["$" + field.substring(0, field.length - 1)]
   );
-  const attrib = useStore(searchStores["$" + field]);
 
   if (!items) return null;
 
@@ -116,7 +111,6 @@ function AttributeCombo({ field }) {
       onChange={(event) =>
         searchEvents[field + "Changed"](event.selectedItems.map((e) => e._id))
       }
-      defaultValue={attrib}
       items={items}
     ></MultiSelect>
   );
@@ -218,6 +212,13 @@ const SearchList = () => {
   const properties = useStore($properties);
   const clear = () => propertiesChanged([]);
   const callback = useCallback(() => 90, []);
+  const save = useCallback(() => {
+    const attributes = {};
+    attributeFields.forEach(
+      (e) => (attributes[e] = attributeStores["$" + e].getState())
+    );
+    saveExcel(properties, attributes);
+  }, [properties]);
 
   if (!properties?.length) return null;
 
@@ -230,6 +231,16 @@ const SearchList = () => {
         <div className="text-base font-bold my-auto mr-auto">
           {properties.length} Propriété(s)
         </div>
+        {properties?.length && (
+          <Button
+            size="sm"
+            kind="ghost"
+            className="ml-auto my-auto h-12"
+            onClick={save}
+          >
+            <Save20 className="float-right ml-auto mr-0" slot="icon" />
+          </Button>
+        )}
         <Button size="sm" kind="ghost" className="my-auto h-12" onClick={clear}>
           <Close20 className="float-right mr-0" slot="icon" />
         </Button>
@@ -283,11 +294,6 @@ const SearchParams = () => {
 };
 
 const SearchActions = () => {
-  const clear = () => {
-    Object.keys(searchEvents).forEach((key) => {
-      searchEvents[key](null);
-    });
-  };
   const go = async () => {
     pendingChanged(true);
     await fetchProperties($search.getState());
@@ -297,15 +303,7 @@ const SearchActions = () => {
   return (
     <>
       <div className="flex flex-row z-10 bg-white p-4">
-        <div className="text-base font-bold my-auto">Paramètres</div>
-        <Button
-          size="sm"
-          kind="ghost"
-          className="ml-auto my-auto h-12"
-          onClick={clear}
-        >
-          <Erase20 className="float-right ml-auto mr-0" slot="icon" />
-        </Button>
+        <div className="text-base font-bold mr-auto my-auto">Paramètres</div>
         <Button size="sm" className="h-12 my-auto" onClick={go}>
           <Checkmark20 className="float-right ml-auto mr-0" slot="icon" />
         </Button>

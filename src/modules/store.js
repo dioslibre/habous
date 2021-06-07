@@ -2,6 +2,7 @@ import { combine, createEvent, createStore } from "effector";
 import { create } from "./db";
 import { map } from "./map";
 import { transformArrayToWorld, transformOneToLocal } from "./utils";
+import { LngLatBounds } from "mapbox-gl";
 
 // tab
 export const tabChanged = createEvent();
@@ -11,12 +12,12 @@ export const $tab = createStore(0).on(tabChanged, (_, payload) => payload);
 // property
 export const PropertyFields = [
   "Unité",
-  "Conservation",
-  "Statut",
   "Identifiant",
   "Régime foncier",
   "N° Réquisition",
   "Titre foncier",
+  "Conservation",
+  "Statut de possession",
   "Propriétaire",
   "Consistance",
   "Affectation",
@@ -50,7 +51,7 @@ export const $property = createStore(null).on(
       const coordinates = transformArrayToWorld(payload.Coordonnées);
       let bounds = coordinates.reduce(function (b, coord) {
         return b.extend(coord);
-      }, new window.mapboxgl.LngLatBounds(coordinates[0], coordinates[1]));
+      }, new LngLatBounds(coordinates[0], coordinates[1]));
 
       map.fitBounds(bounds, {
         padding: 200,
@@ -90,7 +91,9 @@ export const attributeFields = [
   "Propriétaire",
   "Consistance",
   "Affectation",
-  "TypeDeDocument",
+  "Type de document",
+  "Statut de possession",
+  "Régime foncier",
 ];
 export const attributeEvents = {};
 attributeFields.forEach(

@@ -21,6 +21,8 @@
     "effector-react": "^21.3.2",
     "exceljs": "^4.2.1",
     "jspdf": "^2.3.1",
+    "mapbox-expression": "^0.0.3",
+    "mapbox-gl": "^1.0.0",
     "proj4": "^2.7.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
@@ -29,7 +31,6 @@
     "react-virtualized-auto-sizer": "^1.0.5"
   },
   "devDependencies": {
-    "sass": "1.32.13",
     "@babel/core": "^7.13.8",
     "@babel/plugin-transform-runtime": "^7.14.3",
     "@babel/preset-env": "^7.13.9",
@@ -48,6 +49,7 @@
     "postcss-loader": "^5.3.0",
     "postcss-preset-env": "^6.7.0",
     "react-refresh": "^0.10.0",
+    "sass": "1.32.13",
     "sass-loader": "^11.1.1",
     "style-loader": "^2.0.0",
     "tailwindcss": "^2.1.2",

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 @import "react-toastify/dist/ReactToastify.css";
+@import "mapbox-gl/dist/mapbox-gl";
 
 body * {
   font-family: "IBM Plex Sans", "Amiri", serif;
@@ -86,8 +87,13 @@ div[role="tabpanel"] {
 }
 
 .bx--modal-container {
-  width: 1200px;
-  max-width: 70%;
+  @apply h-screen;
+  @apply w-screen;
+  @apply max-h-screen;
+}
+
+.bx--loading-overlay {
+  z-index: 100000;
 }
 
 @media print {
@@ -112,4 +118,8 @@ div[role="tabpanel"] {
   margin: 0;
   padding: 5px 10px;
   border-radius: 3px;
+}
+
+.bx--modal-close {
+  display: none;
 }

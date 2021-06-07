@@ -1,7 +1,16 @@
 ﻿{
-  "TypeDeDocument": [
-    { "name": "Plan topographique", "type": "TypeDeDocument" },
-    { "name": "Certificat de propriété", "type": "TypeDeDocument" }
+  "Type de document": [
+    { "name": "Plan topographique", "type": "Type de document" },
+    { "name": "Certificat de propriété", "type": "Type de document" }
+  ],
+  "Régime foncier": [
+    { "name": "Titre foncier", "type": "Régime foncier" },
+    { "name": "Réquisition", "type": "Régime foncier" },
+    { "name": "Non immatriculé", "type": "Régime foncier" }
+  ],
+  "Statut de possession": [
+    { "name": "En possession", "type": "Statut de possession" },
+    { "name": "Vendue", "type": "Statut de possession" }
   ],
   "Affectation": [
     { "name": "Usage d'Habitat", "type": "Affectation" },

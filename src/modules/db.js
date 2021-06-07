@@ -66,8 +66,14 @@ export const allAttributes = async () => {
   const Affectation = await allofType("Affectation");
   attributeEvents["AffectationChanged"](Affectation);
   await sleep(200);
-  const TypeDeDocument = await allofType("TypeDeDocument");
-  attributeEvents["TypeDeDocumentChanged"](TypeDeDocument);
+  const TypeDeDocument = await allofType("Type de document");
+  attributeEvents["Type de documentChanged"](TypeDeDocument);
+  await sleep(200);
+  const StatutDePossession = await allofType("Statut de possession");
+  attributeEvents["Statut de possessionChanged"](StatutDePossession);
+  await sleep(200);
+  const RégimeFoncier = await allofType("Régime foncier");
+  attributeEvents["Régime foncierChanged"](RégimeFoncier);
   await sleep(200);
 };
 
