@@ -41,7 +41,7 @@ const AttributeEditor = ({ name }) => {
     <TextInput
       ref={ref}
       id={"text-attrib"}
-      value={name || ""}
+      defaultValue={name || ""}
       size="sm"
       light
       labelText="Nom de l'attribut"

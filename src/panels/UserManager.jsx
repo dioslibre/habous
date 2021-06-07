@@ -89,10 +89,10 @@ function Name({ pending, value }) {
 const UserEditor = ({ user }) => {
   return (
     <>
-      <Name defaultValue={user.name} />
-      <FullName defaultValue={user.fullname} />
-      <Password defaultValue={user.password} />
-      <Role defaultValue={user.role} />
+      <Name value={user.name} />
+      <FullName value={user.fullname} />
+      <Password value={user.password} />
+      <Role value={user.role} />
     </>
   );
 };
