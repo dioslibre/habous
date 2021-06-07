@@ -2,15 +2,24 @@ import { propertiesChanged, geometriesChanged, attributeEvents } from "./store";
 
 export let db = null;
 export let usersdb = null;
+export let remotedb = null;
+export let remoteusersdb = null;
 
 export async function usersCreate() {
-  const url =
+  const rurl =
     "https://67e14099-4c90-446a-b70a-569cb72630ba-bluemix:cfeff486e95f33ac12b69fa6cf1e5a538140758f14f89e032d5695122776786a@67e14099-4c90-446a-b70a-569cb72630ba-bluemix.cloudantnosqldb.appdomain.cloud/users";
-  // const url =
-  //   "http://habous:habous@" +
-  //   window.location.host.replace("3000", "5984") +
-  //   "/users";
+  const url =
+    "http://habous:habous@" +
+    window.location.host.replace("3000", "5984") +
+    "/users";
   usersdb = new window.PouchDB(url);
+  remoteusersdb = new window.PouchDB(rurl);
+
+  usersdb.sync(remoteusersdb, {
+    live: true,
+    retry: true,
+  });
+
   const users = await allUsers();
 
   if (!users.length) {
@@ -30,14 +39,20 @@ export const allUsers = async () => {
 };
 
 export async function create() {
-  const url =
+  const rurl =
     "https://67e14099-4c90-446a-b70a-569cb72630ba-bluemix:cfeff486e95f33ac12b69fa6cf1e5a538140758f14f89e032d5695122776786a@67e14099-4c90-446a-b70a-569cb72630ba-bluemix.cloudantnosqldb.appdomain.cloud/habous";
-  // const url =
-  //   "http://habous:habous@" +
-  //   window.location.host.replace("3000", "5984") +
-  //   "/habous";
+  const url =
+    "http://habous:habous@" +
+    window.location.host.replace("3000", "5984") +
+    "/habous";
 
   db = new window.PouchDB(url);
+  remotedb = new window.PouchDB(rurl);
+
+  usersdb.sync(remoteusersdb, {
+    live: true,
+    retry: true,
+  });
 
   const geoms = await allGeoms();
   geometriesChanged(geoms);

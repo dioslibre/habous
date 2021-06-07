@@ -25,9 +25,7 @@ import {
 import {
   Add20,
   ArrowRight20,
-  Checkmark20,
   Close20,
-  Erase20,
   Save20,
   Search20,
 } from "@carbon/icons-react";
@@ -50,6 +48,23 @@ function Titre() {
     />
   );
 }
+
+function Identifiant() {
+  const value = useStore(searchStores["$Identifiant"]);
+  return (
+    <TextInput
+      id={"text-id"}
+      defaultValue={value || ""}
+      size="sm"
+      light
+      labelText="Identifiant"
+      onChange={(event) =>
+        searchEvents["IdentifiantChanged"](event.target.value)
+      }
+    />
+  );
+}
+
 function Requisition() {
   const value = useStore(searchStores["$N° Réquisition"]);
   return (
@@ -195,7 +210,7 @@ const SearchListItem = memo(({ index, row }) => {
       size="lg"
       onClick={navigate}
     >
-      <div className="flex flex-row w-80">
+      <div className="flex flex-row w-120">
         <div>
           <p className="text-base text-black font-bold mb-1">
             Identifiant {row.Identifiant}
@@ -270,6 +285,7 @@ const SearchParams = () => {
   return (
     <div className="flex-grow-default bx-scrollable overflow-auto pt-0 p-4">
       <AttributeCombo field={"Unités"} />
+      <Identifiant />
       <Titre />
       <Requisition />
       <Regime />
