@@ -99,7 +99,6 @@ const UserEditor = ({ user }) => {
 
 const UserManager = () => {
   const users = useStore($users);
-  console.log(users);
 
   const edit = async (user) => {
     pendingChanged(true);
@@ -115,8 +114,7 @@ const UserManager = () => {
         await allUsers();
         pendingChanged(false);
       })
-      .catch(async (e) => {
-        console.log(e);
+      .catch(async () => {
         await allUsers();
         toast("Erreur d'enregistrement", { type: "error", autoClose: 2000 });
         pendingChanged(false);
@@ -143,8 +141,7 @@ const UserManager = () => {
         await allUsers();
         pendingChanged(false);
       })
-      .catch(async (e) => {
-        console.log(e);
+      .catch(async () => {
         toast("Erreur d'enregistrement", { type: "error", autoClose: 2000 });
         await allUsers();
         pendingChanged(false);

@@ -24,7 +24,7 @@ function Auth() {
     console.log(users);
     const session = users.find(
       (e) =>
-        e.name === authStores.$name.getState() &&
+        e.name.toLowerCase() === authStores.$name.getState()?.toLowerCase() &&
         e.password === authStores.$password.getState()
     );
     if (session) {

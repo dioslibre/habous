@@ -1,9 +1,4 @@
-import {
-  propertiesChanged,
-  geometriesChanged,
-  attributeFields,
-  attributeEvents,
-} from "./store";
+import { propertiesChanged, geometriesChanged, attributeEvents } from "./store";
 
 export let db = null;
 export let usersdb = null;
@@ -98,7 +93,7 @@ export function binarySearch(arr, docId) {
 
 export async function allRecords() {
   return (
-    (await db.allDocs({ include_docs: true })?.rows?.map((e) => e.doc)) || []
+    (await db.allDocs({ include_docs: true }))?.rows?.map((e) => e.doc) || []
   );
 }
 

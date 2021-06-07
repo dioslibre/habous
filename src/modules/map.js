@@ -116,6 +116,8 @@ export function create() {
       zoom: map.getZoom(),
     });
   });
+
+  map.on("load", decolorize);
 }
 
 $geometries?.watch((payload) => {
@@ -163,13 +165,24 @@ export const colorize = (name, attributes) => {
         //
       }
     });
-  const features = map.queryRenderedFeatures();
-  for (let index = 0; index < features.length; index++) {
-    const f = features[index];
-    console.log(f);
-    const res = Expression.parse(palette).evaluate(f);
-    console.log(res);
-  }
+};
+
+export const decolorize = () => {
+  map
+    .getStyle()
+    .layers.filter((e) => e.id.includes("inactive"))
+    .forEach((layer) => {
+      try {
+        map.setPaintProperty(layer.id, "fill-color", "red");
+      } catch (e) {
+        //
+      }
+      try {
+        map.setPaintProperty(layer.id, "line-color", "red");
+      } catch (e) {
+        //
+      }
+    });
 };
 
 export function destroy() {
