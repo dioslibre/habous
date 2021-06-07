@@ -23,11 +23,13 @@ import {
   attributeFields,
 } from "../modules/store";
 import {
+  Add20,
   ArrowRight20,
   Checkmark20,
   Close20,
   Erase20,
   Save20,
+  Search20,
 } from "@carbon/icons-react";
 import { fetchProperties } from "../modules/db";
 import AutoSizer from "react-virtualized-auto-sizer";
@@ -244,9 +246,6 @@ const SearchList = () => {
         <Button size="sm" kind="ghost" className="my-auto h-12" onClick={clear}>
           <Close20 className="float-right mr-0" slot="icon" />
         </Button>
-        {/* <Button size="sm" kind="ghost" className="my-auto h-12" onClick={clear}>
-          <Close20 className="float-right mr-0" slot="icon" />
-        </Button> */}
       </div>
       <div style={{ height: "150%" }}>
         <AutoSizer>
@@ -305,7 +304,7 @@ const SearchActions = () => {
       <div className="flex flex-row z-10 bg-white p-4">
         <div className="text-base font-bold mr-auto my-auto">Paramètres</div>
         <Button size="sm" className="h-12 my-auto" onClick={go}>
-          <Checkmark20 className="float-right ml-auto mr-0" slot="icon" />
+          <Search20 slot="icon" />
         </Button>
       </div>
     </>
@@ -318,6 +317,24 @@ const Search = () => {
       <SearchActions />
       <SearchParams />
       <SearchList />
+      <NewPropertyAction />
+    </div>
+  );
+};
+
+const NewPropertyAction = () => {
+  return (
+    <div className="fixed z-10 right-0 bottom-0">
+      <Button
+        style={{ width: 400 }}
+        className="mt-4 mx-auto pr-4 max-w-full"
+        onClick={() => propertyChanged({})}
+      >
+        <div className="flex flex-row w-full">
+          Nouvelle Propriété{" "}
+          <Add20 className="float-right ml-auto mr-0" slot="icon" />
+        </div>
+      </Button>
     </div>
   );
 };

@@ -22,16 +22,17 @@ const Panel = () => {
 
   return (
     <div
-      className={`h-full overflow-hidden text-gray-900 ${
-        print ? "w-0" : "w-92"
-      } flex flex-col`}
+      className={`h-full overflow-hidden text-gray-900 flex flex-col`}
+      style={{ width: 400 }}
     >
       <Tabs selected={tab} type="container">
         <Tab onClick={() => tabChanged(0)} id="tab-1" label="Recherche">
-          <Search />
+          <div className="h-full pb-12">
+            <Search />
+          </div>
         </Tab>
         <Tab
-          disabled={!property}
+          className={`${!property ? "hidden" : ""}`}
           onClick={() => tabChanged(1)}
           id="tab-2"
           label="Propriété"

@@ -62,7 +62,21 @@ function Titre() {
     />
   );
 }
-
+function Identifiant() {
+  const value = useStore(propertyStores["$Identifiant"]);
+  return (
+    <TextInput
+      id={"text-id"}
+      defaultValue={value || ""}
+      size="sm"
+      light
+      labelText="Identifiant"
+      onChange={(event) =>
+        propertyEvents["IdentifiantChanged"](event.target.value)
+      }
+    />
+  );
+}
 function Requisition() {
   const value = useStore(propertyStores["$N° Réquisition"]);
   return (
@@ -129,7 +143,6 @@ function Address() {
     ></TextArea>
   );
 }
-
 function Note() {
   const value = useStore(propertyStores["$Nota Bene"]);
   return (
@@ -145,7 +158,6 @@ function Note() {
     ></TextArea>
   );
 }
-
 function Coordinates() {
   const value = useStore($coordinates);
 
@@ -183,7 +195,6 @@ function Coordinates() {
     ></TextArea>
   );
 }
-
 const PropertyTable = ({ property }) => {
   if (!property) return null;
 
@@ -208,7 +219,6 @@ const PropertyTable = ({ property }) => {
     </table>
   );
 };
-
 const CoordsTable = () => {
   const coords = useStore(propertyStores["$Coordonnées"]);
 
@@ -233,11 +243,11 @@ const CoordsTable = () => {
     </div>
   );
 };
-
 const PropertyEditor = () => {
   return (
     <>
       <AttributeCombo field={"Unité"} />
+      <Identifiant />
       <Titre />
       <Requisition />
       {[
@@ -258,8 +268,8 @@ const PropertyEditor = () => {
     </>
   );
 };
-
-const FileManager = ({ property }) => {
+const FileManager = () => {
+  const property = useStore($property);
   const ref = useRef();
 
   function click() {
@@ -270,7 +280,7 @@ const FileManager = ({ property }) => {
     async (files) => {
       if (!files?.length) return;
       pendingChanged(true);
-      let existing = await getRecord(property._id);
+      let existing = await getRecord(property?._id);
       var file = files[0]; // file is a Blob
       const attachment = {
         type: file.type,
@@ -281,7 +291,7 @@ const FileManager = ({ property }) => {
         : { [file.name]: attachment };
       await db.put(existing);
       await fetchProperties($search.getState());
-      existing = await getRecord(property._id);
+      existing = await getRecord(property?._id);
       propertyChanged(existing);
       pendingChanged(false);
     },
@@ -291,10 +301,10 @@ const FileManager = ({ property }) => {
   const remove = useCallback(
     async (name) => {
       pendingChanged(true);
-      let existing = await getRecord(property._id);
+      let existing = await getRecord(property?._id);
       await db.removeAttachment(existing._id, name, existing._rev);
       await fetchProperties($search.getState());
-      existing = await getRecord(property._id);
+      existing = await getRecord(property?._id);
       propertyChanged(existing);
       pendingChanged(false);
     },
@@ -304,7 +314,7 @@ const FileManager = ({ property }) => {
   const edit = useCallback(
     async (name, kind) => {
       pendingChanged(true);
-      let existing = await getRecord(property._id);
+      let existing = await getRecord(property?._id);
       existing.attachmentTypes = existing.attachmentTypes ?? {};
       existing.attachmentTypes = {
         ...existing.attachmentTypes,
@@ -312,12 +322,14 @@ const FileManager = ({ property }) => {
       };
       await saveRecord(existing);
       await fetchProperties($search.getState());
-      existing = await getRecord(property._id);
+      existing = await getRecord(property?._id);
       propertyChanged(existing);
       pendingChanged(false);
     },
     [property]
   );
+
+  if (!property?._id) return null;
 
   return (
     <div className="mb-14">
@@ -338,7 +350,7 @@ const FileManager = ({ property }) => {
           .filter((f) => f !== "_id" && f !== "_rev")
           .map((f) => (
             <FileEntry
-              _id={property._id}
+              _id={property?._id}
               key={f}
               name={f}
               length={property._attachments[f].length}
@@ -476,7 +488,9 @@ const PropertyActions = ({ editData, setEditData, toggle }) => {
   const [removeData, setRemoveData] = useState(false);
   const save = async () => {
     pendingChanged(true);
-    const edited = (await getRecord($property.getState()._id)) ?? {};
+    const edited = $property.getState()._id
+      ? await getRecord($property.getState()._id)
+      : { type: "Propriété" };
     PropertyFields.forEach((key) => {
       edited[key] = propertyStores["$" + key].getState();
     });
@@ -498,13 +512,18 @@ const PropertyActions = ({ editData, setEditData, toggle }) => {
       }
     }
 
-    saveRecord(edited)
-      .then(async () => {
+    const func = edited._id ? "put" : "post";
+    db[func](edited)
+      .then(async (res) => {
+        console.log(res);
         await fetchProperties($search.getState());
-        propertyChanged(edited);
+        propertyChanged(await db.get(res.id));
         toast("Enregistrement réussie", { type: "success", autoClose: 2000 });
         setEditData(false);
         pendingChanged(false);
+        PropertyFields.forEach((key) => {
+          propertyEvents[key + "Changed"]();
+        });
       })
       .catch((e) => {
         console.log(e);
@@ -596,8 +615,8 @@ const PropertyActions = ({ editData, setEditData, toggle }) => {
 
   return (
     <div
-      className="fixed z-10 left-0 bottom-0 flex flex-row"
-      style={{ width: 368 }}
+      className="fixed z-10 right-0 bottom-0 flex flex-row"
+      style={{ width: 400 }}
     >
       {!editData && !editGeom && (
         <>
@@ -653,7 +672,14 @@ const PropertyActions = ({ editData, setEditData, toggle }) => {
         <Button
           kind="ghost"
           className="mt-4 bg-white text-red-600 mx-auto w-1/2 pr-4"
-          onClick={() => setEditData(false) & editGeomChanged(false)}
+          onClick={() => {
+            if (!$property.getState()?._id) {
+              propertyChanged(null);
+              return;
+            }
+            setEditData(false);
+            editGeomChanged(false);
+          }}
         >
           <div className="flex flex-row w-full">
             Annuler{" "}
@@ -677,7 +703,8 @@ const PropertyActions = ({ editData, setEditData, toggle }) => {
   );
 };
 
-const PropertyData = ({ property, setEditData, editData }) => {
+const PropertyData = ({ setEditData, editData }) => {
+  const property = useStore($property);
   return (
     <>
       <div className="flex flex-row mb-2 h-12">
@@ -702,7 +729,9 @@ const PropertyData = ({ property, setEditData, editData }) => {
 };
 
 const PropertyGeometry = () => {
+  const property = useStore($property);
   const editGeom = useStore($editGeom);
+  if (!property?._id) return null;
   return (
     <>
       <div className="flex flex-row mb-2 mt-4 h-12">
@@ -724,7 +753,7 @@ const PropertyGeometry = () => {
 
 const Property = () => {
   const property = useStore($property);
-  const [editData, setEditData] = useState(false);
+  const [editData, setEditData] = useState();
   const editGeom = useStore($editGeom);
   const ref = useRef(null);
   const [show, toggle] = useToggle(false);
@@ -732,6 +761,7 @@ const Property = () => {
   useEffect(() => {
     editGeomChanged(false);
     setEditData(false);
+    if (property && !property._id) setEditData(true);
   }, [property]);
 
   useEffect(() => {
@@ -744,15 +774,15 @@ const Property = () => {
   }, [editGeom]);
 
   return (
-    <>
-      <PropertyData {...{ property, editData, setEditData }} />
-      <PropertyGeometry {...{ property }} />
-      <FileManager property={property} />
+    <div className="mb-12">
+      <PropertyData {...{ editData, setEditData }} />
+      <PropertyGeometry />
+      <FileManager />
       <PropertyActions {...{ editData, setEditData, toggle }} />
       <div ref={ref} style={{ backgroundColor: "black" }}>
         {show ? <Print toggle={toggle} /> : null}
       </div>
-    </>
+    </div>
   );
 };
 
