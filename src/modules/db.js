@@ -9,8 +9,8 @@ export async function usersCreate() {
   const rurl =
     "https://67e14099-4c90-446a-b70a-569cb72630ba-bluemix:cfeff486e95f33ac12b69fa6cf1e5a538140758f14f89e032d5695122776786a@67e14099-4c90-446a-b70a-569cb72630ba-bluemix.cloudantnosqldb.appdomain.cloud/users";
   const url =
-    "http://habous:habous@" +
-    window.location.host.replace("3000", "5984") +
+    "https://habous:habous@" +
+    window.location.host.replace("3000", "6984") +
     "/users";
   usersdb = new window.PouchDB(url);
   remoteusersdb = new window.PouchDB(rurl);
@@ -42,8 +42,8 @@ export async function create() {
   const rurl =
     "https://67e14099-4c90-446a-b70a-569cb72630ba-bluemix:cfeff486e95f33ac12b69fa6cf1e5a538140758f14f89e032d5695122776786a@67e14099-4c90-446a-b70a-569cb72630ba-bluemix.cloudantnosqldb.appdomain.cloud/habous";
   const url =
-    "http://habous:habous@" +
-    window.location.host.replace("3000", "5984") +
+    "https://habous:habous@" +
+    window.location.host.replace("3000", "6984") +
     "/habous";
 
   db = new window.PouchDB(url);
